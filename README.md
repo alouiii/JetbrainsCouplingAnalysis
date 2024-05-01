@@ -18,7 +18,7 @@ Follow the steps below to run this tool.
    Open a terminal and run the following command:
 
    ```bash
-   git clone [https://github.com/yourusername/yourrepository.git](https://github.com/alouiii/JetbrainsCouplingAnalysis.git)
+   git clone https://github.com/alouiii/JetbrainsCouplingAnalysis.git
 
 2. **Navigate to the directory**:
 
