@@ -15,7 +15,7 @@ def get_commit_files(owner, repo, commit_sha):
 # Function to get the commit history of a repository
 def get_commit_history(repo):
     owner, repo_name = repo.split('/')
-    url = f"https://api.github.com/repos/{repo}/commits?per_page=5"
+    url = f"https://api.github.com/repos/{repo}/commits?per_page=50"
     # Loop until there are no more pages of commits
     while url:
         response = requests.get(url)
@@ -26,7 +26,7 @@ def get_commit_history(repo):
             files = get_commit_files(owner, repo_name, commit_sha)
             yield commit, files
         # Get the URL for the next page of commits
-        url = None  #response.links.get("next", {}).get("url")
+        url = response.links.get("next", {}).get("url")
 
 
 # Function to get pairs of contributors who have edited the same files
@@ -59,12 +59,14 @@ def main(repo):
         # Get the pairs of contributors who have edited the same files
         contributor_pairs = get_contributor_pairs(commit_history)
 
-        # Find the pair with the max count
-        max_pair = max(contributor_pairs.items(), key=lambda x: x[1])
-        # Print the pair with the max count
-        print(f"The developers who most frequently contribute to the same files/modules in a GitHub repository are: \n "
-              f"\033[94m{max_pair[0][0]}\033[0m and \033[94m{max_pair[0][1]}\033[0m with \033[94m{max_pair[1]}\033[0m "
-              f"files in common.")
+        # Sort the pairs by count in descending order and take the top 5
+        top_pairs = sorted(contributor_pairs.items(), key=lambda x: x[1], reverse=True)[:5]
+        # Print the top 5 (or less) pairs
+        print(f"The top {len(top_pairs)} pairs of developers who most frequently contribute to the same "
+              f"files/modules in a GitHub repository are:")
+        for pair, count in top_pairs:
+            print(f"\033[94m{pair[0]}\033[0m and \033[94m{pair[1]}\033[0m have \033[94m{count}\033[0m files in common.")
+
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -74,4 +76,4 @@ if __name__ == "__main__":
     import sys
 
     # Call the main function with the first command-line argument as the repository identifier
-    main('JetBrains/projector-docker')
+    main(sys.argv[1])
